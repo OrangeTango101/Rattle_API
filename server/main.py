@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 import asyncio
 from contextlib import asynccontextmanager
 from pydantic import BaseModel
-from game import Game
+from .game import Game
 import uuid
 import time
 

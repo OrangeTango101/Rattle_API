@@ -170,6 +170,9 @@ def leave_game(game_id: str, user_id: str):
     if user_id not in games[game_id].users:
         raise HTTPException(status_code=404, detail="User not found") 
     games[game_id].user_disconnect(user_id)
+    if all([user.disconnected for user in games[game_id].users.values()]):
+        games.pop(game_id)
+
     return {"message": "Successfully left the game"}
 
 

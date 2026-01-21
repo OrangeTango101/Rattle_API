@@ -31,7 +31,6 @@ class Game:
     def to_dict(self):
         return {
             "game_state": self.game_state.get_data(), 
-            "state_history": self.state_history,
             "winner": self.winner,
             "win_type": self.win_type,
             "rounds": self.rounds,
@@ -42,8 +41,11 @@ class Game:
         if not self.winner is None:
             return 
         
-        self.game_state.run_action(self.player_turn, action)
-        #TODO: Update state_history after every action
+        if action == "<" and self.game_type == "local":
+            self.back_one_step()
+        else: 
+            self.game_state.run_action(self.player_turn, action)
+            self.state_history.append((self.game_state.get_copy(), self.player_turn))
 
         self.winner = self.game_state.get_winner()
         if not self.winner is None:
@@ -69,9 +71,6 @@ class Game:
             else:
                 self.game_state = GameState(copy.deepcopy(Game.initial_state))
                 self.player_turn = 0
-            print(f"Went back to move {len(self.state_history)}")
-        else:
-            print("Cannot go back further")
     
     def get_game_state(self): 
         return self.game_state
@@ -86,7 +85,7 @@ class Game:
 
     def user_disconnect(self, user_id):
         self.users[user_id].disconnected = True
-        if not self.winner and len(self.users) > 1:
+        if (self.winner is None) and len(self.users) > 1:
             self.winner = self.get_other_user(user_id).players[0]
             self.win_type = "Forfeit"
     
@@ -152,7 +151,7 @@ class GameState:
         for snake in actions: 
             actions_ls.extend(actions[snake])
 
-        return actions_ls
+        return actions_ls+["<"]
 
     def get_actions(self, player):
         '''
